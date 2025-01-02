@@ -86,18 +86,22 @@ def pickup(positive, negative):
     current_time = int(time.time())
     fm_comfyui_bridge.bridge.save_image(
         draft,
-        positive,
+        f"{lora.trigger}, {positive}",
         negative,
         filename=f"draft_{current_time}.png",
         workspace="./",
         output_dir="outputs",
     )
     image = fm_comfyui_bridge.bridge.generate_i2i_highreso(
-        positive, negative, lora, lora.image_size, f"./outputs/draft_{current_time}.png"
+        f"{lora.trigger}, {positive}",
+        negative,
+        lora,
+        lora.image_size,
+        f"./outputs/draft_{current_time}.png",
     )
     fm_comfyui_bridge.bridge.save_image(
         image,
-        positive,
+        f"{lora.trigger}, {positive}",
         negative,
         filename=f"fine_{current_time}.png",
         workspace="./",
