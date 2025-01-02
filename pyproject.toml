@@ -1,0 +1,26 @@
+[project]
+name = "CheckAndPick"
+version = "0.1.0"
+description = "Image drafter."
+readme = "README.md"
+authors = [
+    { name = "rerofumi", email = "rero2@yuumu.org" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1.8",
+    "fm-comfyui-bridge>=0.5.5",
+    "gradio>=5.9.1",
+    "pillow>=11.1.0",
+    "pyyaml>=6.0.2",
+]
+
+[project.scripts]
+CheckAndPick = "CheckAndPick.CheckAndPick:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+fm-comfyui-bridge = { git = "http://192.168.0.120:33000/rerofumi/fm_comfyui_bridge.git" }
