@@ -123,7 +123,7 @@ wheels = [
 
 [[package]]
 name = "checkandpick"
-version = "0.1.0"
+version = "0.1.5"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -136,7 +136,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.1.8" },
-    { name = "fm-comfyui-bridge", git = "http://192.168.0.120:33000/rerofumi/fm_comfyui_bridge.git" },
+    { name = "fm-comfyui-bridge", specifier = ">=0.6.3" },
     { name = "gradio", specifier = ">=5.9.1" },
     { name = "pillow", specifier = ">=11.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -197,12 +197,16 @@ wheels = [
 
 [[package]]
 name = "fm-comfyui-bridge"
-version = "0.5.6"
-source = { git = "http://192.168.0.120:33000/rerofumi/fm_comfyui_bridge.git#084428b1cd4099c0733a6e4d338ffcefd5f8054f" }
+version = "0.6.4"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
     { name = "pyyaml" },
     { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f9/92/33d1556e10a255209a1228509b10c72f2151c967920162593ef537aca1ef/fm_comfyui_bridge-0.6.4.tar.gz", hash = "sha256:2d540493a81eadef4f43acfa52d7ec641aa98efa69b167584ed54c860b477de1", size = 53502 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8c/33/304061559b9e8e6494ea764960035c18ed81a819e73255bd6ac16a8704ab/fm_comfyui_bridge-0.6.4-py3-none-any.whl", hash = "sha256:7c29e134a2bbc6774da3eef8498a5ab8454020fc41ce92549db36dfaf6ff80e6", size = 12833 },
 ]
 
 [[package]]

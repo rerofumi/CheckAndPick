@@ -4,7 +4,7 @@ image-size:
   height: 768
 lora:
 - enabled: true
-  model: lora-ix-hmkmrbn-v6.safetensors
+  model: lora-ix-tillhi-v1.safetensors
   strength: 0
   trigger: kafuu_chino
 vpred: true
