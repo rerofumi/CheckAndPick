@@ -133,7 +133,7 @@ def gui(positivive, negative):
         )
 
         # Draft generate button
-        draft_button = gr.Button("Draft generate button")
+        draft_button = gr.Button("Draft generate")
 
         # Draft images gallery
         gallery = gr.Gallery(

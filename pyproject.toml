@@ -1,6 +1,6 @@
 [project]
 name = "CheckAndPick"
-version = "0.1.8"
+version = "0.2.0"
 description = "Image drafter."
 readme = "README.md"
 authors = [
