@@ -5,8 +5,8 @@ image-size:
 lora:
 - enabled: true
   model: lora-ix-tillhi-v1.safetensors
-  strength: 0
-  trigger: kafuu_chino
+  strength: 1
+  trigger: trigger
 vpred: true
 lcm:
   checkpoint: catTowerNoobaiXL_v10.safetensors

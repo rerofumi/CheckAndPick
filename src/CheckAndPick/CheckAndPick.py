@@ -17,14 +17,18 @@ NEGATIVE_PROMPT = "lowres, (bad), text, error, fewer, extra, missing, worst qual
 # 灰色の画像を9つ作成し、リストに格納
 draft_images = [Image.new("RGB", (1024, 1024), color="gray") for _ in range(9)]
 
+# 選択したイメージのリスト
+pickup_images = []
+
 # 選択中のイメージ
-select_index = 0
+select_draft_index = 0
+select_pickup_index = 0
 
 # lora yaml
 lora = SdLoraYaml()
 
 
-def generate_draft(positive, negative):
+def generate_draft(positive, negative, progress_bar=gr.Progress()):
     global draft_images
     images = []
     prompt_path = json.loads(comfy_api.LCM_WORKFLOW)
@@ -59,7 +63,7 @@ def generate_draft(positive, negative):
         "lora"
     ]
     # draft 生成
-    for _ in range(9):
+    for _ in progress_bar.tqdm(range(9), desc="Generating drafts...", total=9):
         prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
             1, 10000000000
         )
@@ -70,48 +74,105 @@ def generate_draft(positive, negative):
                 id, output_node=config.COMFYUI_NODE_OUTPUT
             )
             images.append(image)
+        else:
+            break
+
     draft_images = images
 
     return draft_images
 
 
 def draft_select(evt: gr.SelectData):
-    global select_index
-    select_index = evt.index
+    global select_draft_index
+    select_draft_index = evt.index
 
 
-def pickup(positive, negative):
-    global select_index, draft_images, lora
-    draft = draft_images[select_index]
+def pickup_select(evt: gr.SelectData):
+    global select_pickup_index
+    select_pickup_index = evt.index
+
+
+def pickup():
+    global select_draftindex, draft_images
+    pickup_images.append(draft_images[select_draft_index])
+    return pickup_images
+
+
+def remove_pickup():
+    del pickup_images[select_pickup_index]
+    return pickup_images
+
+
+def add_pickup(image):
+    if image is None:
+        return None
+    # PIL Imageオブジェクトとして処理
+    img = Image.fromarray(image)
+    pickup_images.append(img)
+    return [None, pickup_images]
+
+
+def save_pickup(positive, negative, progress_bar=gr.Progress()):
     current_time = int(time.time())
-    fm_comfyui_bridge.bridge.save_image(
-        draft,
-        f"{lora.trigger}, {positive}",
-        negative,
-        filename=f"draft_{current_time}.png",
-        workspace="./",
-        output_dir="outputs",
-    )
-    image = fm_comfyui_bridge.bridge.generate_i2i_highreso(
-        f"{lora.trigger}, {positive}",
-        negative,
-        lora,
-        lora.image_size,
-        f"./outputs/draft_{current_time}.png",
-    )
-    fm_comfyui_bridge.bridge.save_image(
-        image,
-        f"{lora.trigger}, {positive}",
-        negative,
-        filename=f"fine_{current_time}.png",
-        workspace="./",
-        output_dir="outputs",
-    )
-    return image
+    for image in progress_bar.tqdm(
+        pickup_images, desc="Generating drafts...", total=len(pickup_images)
+    ):
+        fm_comfyui_bridge.bridge.save_image(
+            image,
+            f"{lora.trigger}, {positive}",
+            negative,
+            filename=f"pickup_{current_time}.png",
+            workspace="./",
+            output_dir="outputs",
+        )
+        current_time += 1
+
+
+def clear_pickup():
+    global pickup_images
+    pickup_images = []
+    return pickup_images
+
+
+def rendering(positive, negative, progress_bar=gr.Progress()):
+    global pickup_images, lora
+    result = []
+    pickups = pickup_images.copy()
+    if pickups is None:
+        return None
+    if pickups == []:
+        return None
+    for draft in progress_bar.tqdm(pickups, desc="Generating...", total=len(pickups)):
+        current_time = int(time.time())
+        fm_comfyui_bridge.bridge.save_image(
+            draft,
+            f"{lora.trigger}, {positive}",
+            negative,
+            filename=f"draft_{current_time}.png",
+            workspace="./",
+            output_dir="outputs",
+        )
+        image = fm_comfyui_bridge.bridge.generate_i2i_highreso(
+            f"{lora.trigger}, {positive}",
+            negative,
+            lora,
+            lora.image_size,
+            f"./outputs/draft_{current_time}.png",
+        )
+        fm_comfyui_bridge.bridge.save_image(
+            image,
+            f"{lora.trigger}, {positive}",
+            negative,
+            filename=f"fine_{current_time}.png",
+            workspace="./",
+            output_dir="outputs",
+        )
+        result.append(image)
+    return result
 
 
 def gui():
-    with gr.Blocks() as demo:
+    with gr.Blocks(theme=gr.themes.Ocean()) as demo:
         # Positive Prompt
         positive_prompt = gr.Textbox(
             label="Positive Prompt",
@@ -138,10 +199,30 @@ def gui():
         )
 
         # Pickup draft button
-        pickup_button = gr.Button("Pickup Draft & Generate")
+        pickup_button = gr.Button("Pickup")
+
+        # Draft images gallery
+        pickup_gallery = gr.Gallery(
+            value=pickup_images,
+            columns=3,
+            label="Pickups",
+        )
+
+        # pickup editor
+        with gr.Accordion("Edit pickup", open=False):
+            with gr.Row():
+                save_pickup_button = gr.Button("Save pickup image(s)")
+                remove_pickup_button = gr.Button("Remove")
+                clear_pickup_button = gr.Button("Clear", variant="stop")
+            add_pickup_image = gr.Image(label="Add Pickup Image")
+
+        # Final rendering button
+        rendering_button = gr.Button("Refine")
 
         # Generate Image display
-        generate_image = gr.Image(value=None, label="Generate Image", interactive=False)
+        generate_image = gr.Gallery(
+            value=None, label="Generate Image", interactive=False
+        )
 
         #
         # Events
@@ -152,9 +233,29 @@ def gui():
             outputs=gallery,
         )
         gallery.select(fn=draft_select, inputs=None, outputs=None)
-        pickup_button.click(
-            fn=pickup, inputs=[positive_prompt, negative_prompt], outputs=generate_image
+        #
+        pickup_button.click(fn=pickup, outputs=pickup_gallery)
+        save_pickup_button.click(
+            fn=save_pickup, inputs=[positive_prompt, negative_prompt], outputs=None
         )
+        remove_pickup_button.click(fn=remove_pickup, outputs=pickup_gallery)
+        clear_pickup_button.click(fn=clear_pickup, outputs=pickup_gallery)
+        pickup_gallery.select(fn=pickup_select, inputs=None, outputs=None)
+        add_pickup_image.upload(
+            fn=add_pickup,
+            inputs=add_pickup_image,
+            outputs=[add_pickup_image, pickup_gallery],
+        )
+
+        # Rendering events
+        rendering_button.click(
+            fn=rendering,
+            inputs=[positive_prompt, negative_prompt],
+            outputs=generate_image,
+        )
+
+    #
+    demo.queue()
     demo.launch()
 
 
