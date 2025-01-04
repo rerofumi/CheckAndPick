@@ -1,6 +1,3 @@
-import datetime
-import json
-import random
 import time
 
 import click
@@ -9,8 +6,7 @@ import gradio as gr
 from fm_comfyui_bridge.lora_yaml import SdLoraYaml
 from PIL import Image
 
-import CheckAndPick.comfy_api as comfy_api
-import CheckAndPick.config as config
+import CheckAndPick.generator as generator
 
 NEGATIVE_PROMPT = "lowres, (bad), text, error, fewer, extra, missing, worst quality, jpeg artifacts, low quality, watermark, unfinished, displeasing, oldest, early, chromatic aberration, signature, extra digits, artistic error, username, scan, abstract, (((cg, 3dcg)))  dialogue, dialogue ballon"
 
@@ -28,58 +24,37 @@ select_pickup_index = 0
 lora = SdLoraYaml()
 
 
+#
+# ComfyUI API
+#
 def generate_draft(positive, negative, progress_bar=gr.Progress()):
-    global draft_images
+    global draft_images, lora
     images = []
-    prompt_path = json.loads(comfy_api.LCM_WORKFLOW)
-    # パラメータ埋め込み
-    prompt_path[config.COMFYUI_NODE_CHECKPOINT]["inputs"]["ckpt_name"] = lora.data[
-        "lcm"
-    ]["checkpoint"]
-    prompt_path[config.COMFYUI_NODE_PROMPT]["inputs"]["text"] = (
-        f"{lora.trigger}, {positive}"
-    )
-    prompt_path[config.COMFYUI_NODE_NEGATIVE]["inputs"]["text"] = negative
-    prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
-        1, 10000000000
-    )
-    prompt_path[config.COMFYUI_NODE_SIZE]["inputs"]["width"] = lora.image_size[0]
-    prompt_path[config.COMFYUI_NODE_SIZE]["inputs"]["height"] = lora.image_size[1]
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["lora_name"] = lora.model
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_model"] = (
-        lora.strength
-    )
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_clip"] = (
-        lora.strength
-    )
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    prompt_path[config.COMFYUI_NODE_OUTPUT]["inputs"]["filename_prefix"] = (
-        f"{current_date}/Bridge"
-    )
-    if not lora.lora_enabled:
-        prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_model"] = 0
-        prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_clip"] = 0
-    prompt_path[config.COMFYUI_NODE_LCM_LORA]["inputs"]["lora_name"] = lora.data["lcm"][
-        "lora"
-    ]
+    prompt_path = generator.draft_prompt(positive, negative, lora)
     # draft 生成
     for _ in progress_bar.tqdm(range(9), desc="Generating drafts...", total=9):
-        prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
-            1, 10000000000
-        )
-        id = fm_comfyui_bridge.bridge.send_request(prompt_path)
-        if id:
-            fm_comfyui_bridge.bridge.await_request(1, 3)
-            image = fm_comfyui_bridge.bridge.get_image(
-                id, output_node=config.COMFYUI_NODE_OUTPUT
-            )
-            images.append(image)
-        else:
-            break
-
+        images.append(generator.drafts(prompt_path))
     draft_images = images
 
-    return draft_images
+    return images
+
+
+def rendering(positive, negative, progress_bar=gr.Progress()):
+    global pickup_images, lora
+    result = []
+    pickups = pickup_images.copy()
+    if pickups is None:
+        return None
+    if pickups == []:
+        return None
+    for draft in progress_bar.tqdm(pickups, desc="Generating...", total=len(pickups)):
+        result.append(generator.highreso(draft, positive, negative, lora))
+    return result
+
+
+#
+# UI handlers
+#
 
 
 def draft_select(evt: gr.SelectData):
@@ -134,41 +109,9 @@ def clear_pickup():
     return pickup_images
 
 
-def rendering(positive, negative, progress_bar=gr.Progress()):
-    global pickup_images, lora
-    result = []
-    pickups = pickup_images.copy()
-    if pickups is None:
-        return None
-    if pickups == []:
-        return None
-    for draft in progress_bar.tqdm(pickups, desc="Generating...", total=len(pickups)):
-        current_time = int(time.time())
-        fm_comfyui_bridge.bridge.save_image(
-            draft,
-            f"{lora.trigger}, {positive}",
-            negative,
-            filename=f"draft_{current_time}.png",
-            workspace="./",
-            output_dir="outputs",
-        )
-        image = fm_comfyui_bridge.bridge.generate_i2i_highreso(
-            f"{lora.trigger}, {positive}",
-            negative,
-            lora,
-            lora.image_size,
-            f"./outputs/draft_{current_time}.png",
-        )
-        fm_comfyui_bridge.bridge.save_image(
-            image,
-            f"{lora.trigger}, {positive}",
-            negative,
-            filename=f"fine_{current_time}.png",
-            workspace="./",
-            output_dir="outputs",
-        )
-        result.append(image)
-    return result
+#
+# UI main
+#
 
 
 def gui():
@@ -209,7 +152,7 @@ def gui():
         )
 
         # pickup editor
-        with gr.Accordion("Edit pickup", open=False):
+        with gr.Accordion("Edit pickups", open=False):
             with gr.Row():
                 save_pickup_button = gr.Button("Save pickup image(s)")
                 remove_pickup_button = gr.Button("Remove")
@@ -259,7 +202,9 @@ def gui():
     demo.launch()
 
 
+#
 # CLI main function
+#
 @click.command("CheckAndPick", help="ComfyUI frontend")
 @click.argument("lora_yaml", type=str)
 def run(lora_yaml: str):

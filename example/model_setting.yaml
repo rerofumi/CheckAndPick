@@ -8,6 +8,7 @@ lora:
   strength: 1
   trigger: trigger
 vpred: true
+upscale: true
 lcm:
   checkpoint: catTowerNoobaiXL_v10.safetensors
   lora: lcm_lora_sdxl.safetensors
