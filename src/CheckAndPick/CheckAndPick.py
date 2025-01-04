@@ -8,7 +8,9 @@ from PIL import Image
 
 import CheckAndPick.generator as generator
 
-NEGATIVE_PROMPT = "lowres, (bad), text, error, fewer, extra, missing, worst quality, jpeg artifacts, low quality, watermark, unfinished, displeasing, oldest, early, chromatic aberration, signature, extra digits, artistic error, username, scan, abstract, (((cg, 3dcg)))  dialogue, dialogue ballon"
+POSITIVE_PROMPT = "masterpiece, best quality, 1girl"
+NEGATIVE_PROMPT = "worst quality, bad quality, low quality, lowres, scan artifacts, jpeg artifacts, sketch, light particles"
+
 
 # 灰色の画像を9つ作成し、リストに格納
 draft_images = [Image.new("RGB", (1024, 1024), color="gray") for _ in range(9)]
@@ -114,18 +116,18 @@ def clear_pickup():
 #
 
 
-def gui():
+def gui(positivive, negative):
     with gr.Blocks(theme=gr.themes.Ocean()) as demo:
         # Positive Prompt
         positive_prompt = gr.Textbox(
             label="Positive Prompt",
             placeholder="Enter positive prompt here",
-            value="masterpiece, best quality, 1girl",
+            value=positivive,
         )
 
         # Negative Prompt
         negative_prompt = gr.Textbox(
-            value=NEGATIVE_PROMPT,
+            value=negative,
             label="Negative Prompt",
             placeholder="Enter negative prompt here",
         )
@@ -199,7 +201,7 @@ def gui():
 
     #
     demo.queue()
-    demo.launch()
+    demo.launch(share=False, inbrowser=True)
 
 
 #
@@ -210,4 +212,11 @@ def gui():
 def run(lora_yaml: str):
     global lora
     lora.read_from_yaml(lora_yaml)
-    gui()
+    positive = POSITIVE_PROMPT
+    negative = NEGATIVE_PROMPT
+    if "prompt" in lora.data:
+        if "positive" in lora.data["prompt"]:
+            positive = lora.data["prompt"]["positive"]
+        if "negative" in lora.data["prompt"]:
+            negative = lora.data["prompt"]["negative"]
+    gui(positive, negative)
