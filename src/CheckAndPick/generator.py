@@ -53,15 +53,15 @@ def draft_prompt(
     return prompt_path
 
 
-def drafts(prompt_path):
+def drafts(prompt_path, server_url=None):
     prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
         1, 10000000000
     )
-    id = fm_comfyui_bridge.bridge.send_request(prompt_path)
+    id = fm_comfyui_bridge.bridge.send_request(prompt_path, server_url)
     if id:
-        fm_comfyui_bridge.bridge.await_request(1, 3)
+        fm_comfyui_bridge.bridge.await_request(1, 3, server_url)
         image = fm_comfyui_bridge.bridge.get_image(
-            id, output_node=config.COMFYUI_NODE_OUTPUT
+            id, output_node=config.COMFYUI_NODE_OUTPUT, server_url=server_url
         )
         return image
 
@@ -117,7 +117,7 @@ def t2i_highreso_request_build(
     return prompt_path
 
 
-def highreso(draft, positive, negative, lora):
+def highreso(draft, positive, negative, lora, server_url=None):
     current_time = int(time.time())
     upload_image = f"draft_{current_time}.png"
     fm_comfyui_bridge.bridge.save_image(
@@ -130,16 +130,16 @@ def highreso(draft, positive, negative, lora):
     )
     #
     fm_comfyui_bridge.bridge.send_image(
-        f"./outputs/{upload_image}", upload_name=upload_image
+        f"./outputs/{upload_image}", upload_name=upload_image, server_url=server_url
     )
     prompt = t2i_highreso_request_build(positive, negative, lora)
     prompt[config.COMFYUI_NODE_HR_LOAD_IMAGE]["inputs"]["image"] = upload_image
     #
-    id = fm_comfyui_bridge.bridge.send_request(prompt)
+    id = fm_comfyui_bridge.bridge.send_request(prompt, server_url)
     if id:
-        fm_comfyui_bridge.bridge.await_request(1, 3)
+        fm_comfyui_bridge.bridge.await_request(1, 3, server_url)
         image = fm_comfyui_bridge.bridge.get_image(
-            id, output_node=config.COMFYUI_NODE_HR_OUTPUT
+            id, output_node=config.COMFYUI_NODE_HR_OUTPUT, server_url=server_url
         )
     else:
         raise Exception("Request failed")

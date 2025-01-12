@@ -44,8 +44,13 @@ uv run CheckAndPick (yaml file path)
 インストール後、以下のコマンドで CheckAndPick を起動できます。
 
 ```bash
-CheckAndPick (yaml file path)
+CheckAndPick (yaml file path) [-h, --host <ComfyUIのアドレスURL>]
 ```
+
+### オプション
+
+- `-h, --host`: 接続する ComfyUI のアドレスURLを指定します。
+  - `http://127.0.0.1:8188/` の URL 形式で指定してください。
 
 画像生成には、各種指示を記述したYAML形式の設定ファイルが必要です。プログラム起動時にこのファイルを指定する必要があります。予め用意しておいてください。
 
@@ -140,6 +145,8 @@ Workflow が読み込めて、問題無いようなら 1回実行してみてく
 
 ## 更新履歴
 
+- Jan.12.2025 - v0.2.1
+  - `-h, --host` オプションで接続する ComfyUI のアドレスURLを指定できる機能を追加
 - Jan.04.2025 - v0.2.0
   - ファーストリリース
 

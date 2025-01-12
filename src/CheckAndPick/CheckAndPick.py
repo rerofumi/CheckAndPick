@@ -25,6 +25,9 @@ select_pickup_index = 0
 # lora yaml
 lora = SdLoraYaml()
 
+# ComfyUI host URL
+comfyui_host = None
+
 
 #
 # ComfyUI API
@@ -35,7 +38,7 @@ def generate_draft(positive, negative, progress_bar=gr.Progress()):
     prompt_path = generator.draft_prompt(positive, negative, lora)
     # draft 生成
     for _ in progress_bar.tqdm(range(9), desc="Generating drafts...", total=9):
-        images.append(generator.drafts(prompt_path))
+        images.append(generator.drafts(prompt_path, server_url=comfyui_host))
     draft_images = images
 
     return images
@@ -50,7 +53,9 @@ def rendering(positive, negative, progress_bar=gr.Progress()):
     if pickups == []:
         return None
     for draft in progress_bar.tqdm(pickups, desc="Generating...", total=len(pickups)):
-        result.append(generator.highreso(draft, positive, negative, lora))
+        result.append(
+            generator.highreso(draft, positive, negative, lora, server_url=comfyui_host)
+        )
     return result
 
 
@@ -209,8 +214,10 @@ def gui(positivive, negative):
 #
 @click.command("CheckAndPick", help="ComfyUI frontend")
 @click.argument("lora_yaml", type=str)
-def run(lora_yaml: str):
-    global lora
+@click.option("-h", "--host", default=None, help="Specify the ComfyUI host address")
+def run(lora_yaml: str, host=None):
+    global lora, comfyui_host
+    comfyui_host = host
     lora.read_from_yaml(lora_yaml)
     positive = POSITIVE_PROMPT
     negative = NEGATIVE_PROMPT
