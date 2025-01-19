@@ -121,7 +121,7 @@ def clear_pickup():
 #
 
 
-def gui(positivive, negative):
+def gui(positivive, negative, listen):
     with gr.Blocks(theme=gr.themes.Ocean()) as demo:
         # Positive Prompt
         positive_prompt = gr.Textbox(
@@ -206,7 +206,7 @@ def gui(positivive, negative):
 
     #
     demo.queue()
-    demo.launch(share=False, inbrowser=True)
+    demo.launch(share=False, inbrowser=True, server_name=listen)
 
 
 #
@@ -215,9 +215,12 @@ def gui(positivive, negative):
 @click.command("CheckAndPick", help="ComfyUI frontend")
 @click.argument("lora_yaml", type=str)
 @click.option("-h", "--host", default=None, help="Specify the ComfyUI host address")
-def run(lora_yaml: str, host=None):
+@click.option("-l", "--listen", default=None, help="Specify the server listen address")
+def run(lora_yaml: str, host=None, listen=None):
     global lora, comfyui_host
     comfyui_host = host
+    if listen is None:
+        listen = "127.0.0.1"
     lora.read_from_yaml(lora_yaml)
     positive = POSITIVE_PROMPT
     negative = NEGATIVE_PROMPT
@@ -226,4 +229,4 @@ def run(lora_yaml: str, host=None):
             positive = lora.data["prompt"]["positive"]
         if "negative" in lora.data["prompt"]:
             negative = lora.data["prompt"]["negative"]
-    gui(positive, negative)
+    gui(positive, negative, listen)
