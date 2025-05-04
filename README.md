@@ -83,9 +83,9 @@ prompt:
 - image-size: ベースとなる画像生成サイズです SDXL なので 1024x1024 を基調としてください
   - width: 画像の横幅
   - height: 画像の縦幅
-- lora: 使用する LoRA の設定、キャラクター LoRA を想定しており 1つだけ設定できます
-  - enabled: LoRA を使うか否か、false を設定すると LoRA 強度を 0 に設定し実質無効化します
-  - model: ComfyUI に設定してある LoRA model 名、LoRA disable であっても指定する必要があり、実際に存在する LoRA ファイル名でないとエラーになります。最低 1つは LoRA を用意しておいてください
+- lora: 使用する LoRA の設定、複数設定できますし省略も可能です
+  - enabled: LoRA を使うか否か、false を設定すると無効化します
+  - model: ComfyUI に設定してある LoRA model 名
   - strength: LoRA 適用率です、1で標準、0で影響無し。2 や -1 といった値も設定可能です
   - trigger: キャラクター LoRA 等でワードに紐付けているときのトリガーワードです、この単語が prompt の頭に追加されます
 - vpred: 使用する SDXL モデルが v-prediction の場合 true、epsilon の場合 false を設定します。良くわからない場合は多分 false です
@@ -146,6 +146,8 @@ Workflow が読み込めて、問題無いようなら 1回実行してみてく
 
 ## 更新履歴
 
+- May.04.2025 - v0.3.0
+  - LoRA の複数指定に対応
 - Apr.26.2025 - v0.2.3
   - ハイレゾ生成ワークフローを更新
 - Jan.19.2025 - v0.2.2

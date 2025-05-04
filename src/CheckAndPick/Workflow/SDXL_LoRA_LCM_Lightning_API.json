@@ -11,7 +11,6 @@
   "6": {
     "inputs": {
       "text": "masterpiece, best quality, newest, absurdres, highres, 1girl, loli, gothic_lolita, sofa",
-      "speak_and_recognation": true,
       "clip": [
         "32",
         1
@@ -25,7 +24,6 @@
   "7": {
     "inputs": {
       "text": "worst quality, old, early, low quality, lowres, signature, username, logo, bad hands, mutated hands, mammal, anthro, furry, ambiguous form, feral, semi-anthro, 3d, 3dcg",
-      "speak_and_recognation": true,
       "clip": [
         "32",
         1
@@ -136,28 +134,9 @@
       "title": "ModelSamplingDiscrete"
     }
   },
-  "19": {
-    "inputs": {
-      "lora_name": "lora-ix-tillhi-v1.safetensors",
-      "strength_model": 1,
-      "strength_clip": 1,
-      "model": [
-        "4",
-        0
-      ],
-      "clip": [
-        "4",
-        1
-      ]
-    },
-    "class_type": "LoraLoader",
-    "_meta": {
-      "title": "Load LoRA"
-    }
-  },
   "26": {
     "inputs": {
-      "filename_prefix": "2025-01-02/Rough",
+      "filename_prefix": "2025-05-04/Rough",
       "images": [
         "8",
         0
@@ -174,11 +153,11 @@
       "strength_model": 1,
       "strength_clip": 1,
       "model": [
-        "19",
+        "4",
         0
       ],
       "clip": [
-        "19",
+        "4",
         1
       ]
     },

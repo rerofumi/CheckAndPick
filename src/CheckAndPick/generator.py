@@ -19,45 +19,46 @@ def draft_prompt(
     with importlib.resources.open_text(
         "CheckAndPick.Workflow", "SDXL_LoRA_LCM_Lightning_API.json"
     ) as f:
-        prompt_path = json.load(f)
+        workflow_node = json.load(f)
     # パラメータ埋め込み
-    prompt_path[config.COMFYUI_NODE_CHECKPOINT]["inputs"]["ckpt_name"] = lora.data[
+    workflow_node[config.COMFYUI_NODE_CHECKPOINT]["inputs"]["ckpt_name"] = lora.data[
         "lcm"
     ]["checkpoint"]
-    prompt_path[config.COMFYUI_NODE_PROMPT]["inputs"]["text"] = (
+    workflow_node[config.COMFYUI_NODE_PROMPT]["inputs"]["text"] = (
         f"{lora.trigger}, {positive}"
     )
-    prompt_path[config.COMFYUI_NODE_NEGATIVE]["inputs"]["text"] = negative
-    prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
+    workflow_node[config.COMFYUI_NODE_NEGATIVE]["inputs"]["text"] = negative
+    workflow_node[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
         1, 10000000000
     )
-    prompt_path[config.COMFYUI_NODE_SIZE]["inputs"]["width"] = lora.image_size[0]
-    prompt_path[config.COMFYUI_NODE_SIZE]["inputs"]["height"] = lora.image_size[1]
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["lora_name"] = lora.model
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_model"] = (
-        lora.strength
-    )
-    prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_clip"] = (
-        lora.strength
-    )
+    workflow_node[config.COMFYUI_NODE_SIZE]["inputs"]["width"] = lora.image_size[0]
+    workflow_node[config.COMFYUI_NODE_SIZE]["inputs"]["height"] = lora.image_size[1]
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    prompt_path[config.COMFYUI_NODE_OUTPUT]["inputs"]["filename_prefix"] = (
+    workflow_node[config.COMFYUI_NODE_OUTPUT]["inputs"]["filename_prefix"] = (
         f"{current_date}/Bridge"
     )
     if not lora.lora_enabled:
-        prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_model"] = 0
-        prompt_path[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"]["strength_clip"] = 0
-    prompt_path[config.COMFYUI_NODE_LCM_LORA]["inputs"]["lora_name"] = lora.data["lcm"][
-        "lora"
-    ]
-    return prompt_path
+        workflow_node[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"][
+            "strength_model"
+        ] = 0
+        workflow_node[config.COMFYUI_NODE_LORA_CHECKPOINT]["inputs"][
+            "strength_clip"
+        ] = 0
+    workflow_node[config.COMFYUI_NODE_LCM_LORA]["inputs"]["lora_name"] = lora.data[
+        "lcm"
+    ]["lora"]
+    # lora
+    workflow_node = fm_comfyui_bridge.bridge.insert_loras(
+        workflow_node, lora, config.COMFYUI_NODE_CHECKPOINT
+    )
+    return workflow_node
 
 
-def drafts(prompt_path, server_url=None):
-    prompt_path[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
+def drafts(workflow_node, server_url=None):
+    workflow_node[config.COMFYUI_NODE_SEED]["inputs"]["noise_seed"] = random.randint(
         1, 10000000000
     )
-    id = fm_comfyui_bridge.bridge.send_request(prompt_path, server_url)
+    id = fm_comfyui_bridge.bridge.send_request(workflow_node, server_url)
     if id:
         fm_comfyui_bridge.bridge.await_request(1, 3, server_url)
         image = fm_comfyui_bridge.bridge.get_image(
@@ -79,36 +80,31 @@ def t2i_highreso_request_build(
     with importlib.resources.open_text(
         "CheckAndPick.Workflow", "SDXL_HighReso_I2I_API.json"
     ) as f:
-        prompt_path = json.load(f)
+        workflow_node = json.load(f)
     # パラメータ埋め込み(workflowによって異なる処理)
-    prompt_path[config.COMFYUI_NODE_HR_CHECKPOINT]["inputs"]["ckpt_name"] = (
+    workflow_node[config.COMFYUI_NODE_HR_CHECKPOINT]["inputs"]["ckpt_name"] = (
         lora.checkpoint
     )
-    prompt_path[config.COMFYUI_NODE_HR_PROMPT]["inputs"]["text"] = prompt
-    prompt_path[config.COMFYUI_NODE_HR_NEGATIVE]["inputs"]["text"] = negative
+    workflow_node[config.COMFYUI_NODE_HR_PROMPT]["inputs"]["text"] = prompt
+    workflow_node[config.COMFYUI_NODE_HR_NEGATIVE]["inputs"]["text"] = negative
     for node in config.COMFYUI_NODE_HR_SEED:
-        prompt_path[node]["inputs"]["noise_seed"] = random.randint(1, 10000000000)
-    for node in config.COMFYUI_NODE_HR_LORA_CHECKPOINT:
-        prompt_path[node[0]]["inputs"]["lora_name"] = lora.model
-        prompt_path[node[0]]["inputs"]["strength_model"] = lora.strength * node[1]
-        prompt_path[node[0]]["inputs"]["strength_clip"] = lora.strength * node[1]
+        workflow_node[node]["inputs"]["noise_seed"] = random.randint(1, 10000000000)
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    prompt_path[config.COMFYUI_NODE_HR_OUTPUT]["inputs"]["filename_prefix"] = (
+    workflow_node[config.COMFYUI_NODE_HR_OUTPUT]["inputs"]["filename_prefix"] = (
         f"{current_date}/Bridge"
     )
-    # lora, prediction
-    if not lora.lora_enabled:
-        for node in config.COMFYUI_NODE_HR_LORA_CHECKPOINT:
-            prompt_path[node[0]]["inputs"]["strength_model"] = 0
-            prompt_path[node[0]]["inputs"]["strength_clip"] = 0
+    # prediction
     if lora.vpred:
         for node in config.COMFYUI_NODE_HR_SAMPLING_DISCRETE:
-            prompt_path[node]["inputs"]["sampling"] = "v_prediction"
+            workflow_node[node]["inputs"]["sampling"] = "v_prediction"
     else:
         for node in config.COMFYUI_NODE_HR_SAMPLING_DISCRETE:
-            prompt_path[node]["inputs"]["sampling"] = "eps"
-
-    return prompt_path
+            workflow_node[node]["inputs"]["sampling"] = "eps"
+    # lora
+    workflow_node = fm_comfyui_bridge.bridge.insert_loras(
+        workflow_node, lora, config.COMFYUI_NODE_HR_CHECKPOINT
+    )
+    return workflow_node
 
 
 def highreso(draft, positive, negative, lora, server_url=None):

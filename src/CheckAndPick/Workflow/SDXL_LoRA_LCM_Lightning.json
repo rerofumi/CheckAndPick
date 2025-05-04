@@ -1,6 +1,8 @@
 {
+  "id": "40eb0dc4-96c9-4b70-a0ff-d9f326b109e9",
+  "revision": 0,
   "last_node_id": 32,
-  "last_link_id": 51,
+  "last_link_id": 53,
   "nodes": [
     {
       "id": 8,
@@ -14,7 +16,7 @@
         46
       ],
       "flags": {},
-      "order": 12,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -32,10 +34,10 @@
         {
           "name": "IMAGE",
           "type": "IMAGE",
+          "slot_index": 0,
           "links": [
             41
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -55,7 +57,7 @@
         26
       ],
       "flags": {},
-      "order": 6,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -68,10 +70,10 @@
         {
           "name": "",
           "type": "VAE",
+          "slot_index": 0,
           "links": [
             44
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -91,7 +93,7 @@
         82
       ],
       "flags": {},
-      "order": 7,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -104,11 +106,11 @@
         {
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
             23,
             24
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -162,7 +164,7 @@
         118.56919860839844
       ],
       "flags": {},
-      "order": 9,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -175,18 +177,17 @@
         {
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
             12
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "worst quality, old, early, low quality, lowres, signature, username, logo, bad hands, mutated hands, mammal, anthro, furry, ambiguous form, feral, semi-anthro, 3d, 3dcg",
-        true
+        "worst quality, old, early, low quality, lowres, signature, username, logo, bad hands, mutated hands, mammal, anthro, furry, ambiguous form, feral, semi-anthro, 3d, 3dcg"
       ],
       "color": "#322",
       "bgcolor": "#533"
@@ -210,26 +211,26 @@
         {
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
-            26
-          ],
-          "slot_index": 0
+            52
+          ]
         },
         {
           "name": "CLIP",
           "type": "CLIP",
+          "slot_index": 1,
           "links": [
-            28
-          ],
-          "slot_index": 1
+            53
+          ]
         },
         {
           "name": "VAE",
           "type": "VAE",
+          "slot_index": 2,
           "links": [
             42
-          ],
-          "slot_index": 2
+          ]
         }
       ],
       "properties": {
@@ -251,7 +252,7 @@
         442
       ],
       "flags": {},
-      "order": 11,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -289,10 +290,10 @@
         {
           "name": "output",
           "type": "LATENT",
+          "slot_index": 0,
           "links": [
             17
-          ],
-          "slot_index": 0
+          ]
         },
         {
           "name": "denoised_output",
@@ -355,7 +356,7 @@
         106
       ],
       "flags": {},
-      "order": 10,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -394,7 +395,7 @@
         112.71279907226562
       ],
       "flags": {},
-      "order": 8,
+      "order": 6,
       "mode": 0,
       "inputs": [
         {
@@ -407,18 +408,17 @@
         {
           "name": "CONDITIONING",
           "type": "CONDITIONING",
+          "slot_index": 0,
           "links": [
             11
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "masterpiece, best quality, newest, absurdres, highres, 1girl, loli, gothic_lolita, sofa",
-        true
+        "masterpiece, best quality, newest, absurdres, highres, 1girl, loli, gothic_lolita, sofa"
       ],
       "color": "#232",
       "bgcolor": "#353"
@@ -448,10 +448,10 @@
         {
           "name": "",
           "type": "VAE",
+          "slot_index": 0,
           "links": [
             43
-          ],
-          "slot_index": 0
+          ]
         }
       ],
       "properties": {
@@ -471,37 +471,37 @@
         126
       ],
       "flags": {},
-      "order": 5,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "name": "model",
           "type": "MODEL",
-          "link": 47
+          "link": 52
         },
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 49
+          "link": 53
         }
       ],
       "outputs": [
         {
           "name": "MODEL",
           "type": "MODEL",
+          "slot_index": 0,
           "links": [
             48
-          ],
-          "slot_index": 0
+          ]
         },
         {
           "name": "CLIP",
           "type": "CLIP",
+          "slot_index": 1,
           "links": [
             50,
             51
-          ],
-          "slot_index": 1
+          ]
         }
       ],
       "properties": {
@@ -509,59 +509,6 @@
       },
       "widgets_values": [
         "lcm_lora_sdxl.safetensors",
-        1,
-        1
-      ]
-    },
-    {
-      "id": 19,
-      "type": "LoraLoader",
-      "pos": [
-        -426.4945983886719,
-        125.17950439453125
-      ],
-      "size": [
-        315,
-        126
-      ],
-      "flags": {},
-      "order": 3,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 26
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 28
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            47
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            49
-          ],
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoraLoader"
-      },
-      "widgets_values": [
-        "lora-ix-tillhi-v1.safetensors",
         1,
         1
       ]
@@ -578,7 +525,7 @@
         573.0687255859375
       ],
       "flags": {},
-      "order": 13,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -660,22 +607,6 @@
       "MODEL"
     ],
     [
-      26,
-      4,
-      0,
-      19,
-      0,
-      "MODEL"
-    ],
-    [
-      28,
-      4,
-      1,
-      19,
-      1,
-      "CLIP"
-    ],
-    [
       41,
       8,
       0,
@@ -708,28 +639,12 @@
       "VAE"
     ],
     [
-      47,
-      19,
-      0,
-      32,
-      0,
-      "MODEL"
-    ],
-    [
       48,
       32,
       0,
       16,
       0,
       "MODEL"
-    ],
-    [
-      49,
-      19,
-      1,
-      32,
-      1,
-      "CLIP"
     ],
     [
       50,
@@ -746,21 +661,42 @@
       7,
       0,
       "CLIP"
+    ],
+    [
+      52,
+      4,
+      0,
+      32,
+      0,
+      "MODEL"
+    ],
+    [
+      53,
+      4,
+      1,
+      32,
+      1,
+      "CLIP"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.6830134553650705,
+      "scale": 0.8264462809917354,
       "offset": [
-        -286.5238510143192,
-        -11.316507682794636
+        902.9376536794764,
+        232.9052424346906
       ]
     },
     "workspace_info": {
       "id": "gXQjCIMUFa95g2EifBztV"
-    }
+    },
+    "node_versions": {
+      "comfy-core": "0.3.28"
+    },
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0
   },
   "version": 0.4
 }
